@@ -19,7 +19,7 @@ const EvilGPT = {
             fontSize: 16,
             sounds: true,
             autoScroll: true,
-            ollamaEndpoint: 'http://localhost:11434',
+ollamaEndpoint: 'https://ollama-server-production-cb71.up.railway.app'
             model: 'evilgpt:latest',
             temperature: 0.85,
             maxTokens: 2048,
