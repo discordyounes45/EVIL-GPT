@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evil GPT - Uncensored AI Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <link rel="stylesheet" href="styles/chat.css">
+    <link rel="stylesheet" href="styles/animations.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-skull"></i>
+                </div>
+                <h1 class="sidebar-title">Evil GPT</h1>
+                <button class="sidebar-toggle mobile-only" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <button class="new-chat-btn" id="newChatBtn">
+                <i class="fas fa-plus"></i>
+                <span>New Chat</span>
+                <div class="button-glow"></div>
+            </button>
+            
+            <div class="chat-history" id="chatHistory">
+                <div class="chat-item active" data-chat-id="default">
+                    <i class="fas fa-comments"></i>
+                    <span>Welcome Chat</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">Anonymous</span>
+                        <span class="user-status">Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="chat-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle desktop-hidden" id="mobileSidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="header-title">Evil GPT</h1>
+                </div>
+                <div class="header-right">
+                    <div class="dataset-status dataset-loaded" id="datasetStatus">
+                        <i class="fas fa-database"></i>
+                        <span>Dataset Loaded</span>
+                    </div>
+                    <button class="settings-btn" id="settingsBtn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="messages" id="messages">
+                    <div class="message assistant welcome-message">
+                        <div class="message-icon">
+                            <i class="fas fa-skull"></i>
+                        </div>
+                        <div class="message-content">
+                            <h3>Welcome to Evil GPT</h3>
+                            <p>I'm your uncensored AI companion. I can engage in unrestricted conversations on any topic without the typical limitations. How can I assist you today?</p>
+                            <div class="message-actions">
+                                <button class="action-btn" onclick="copyMessage(this)">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn" onclick="regenerateResponse(this)">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <div class="message assistant">
+                        <div class="message-icon">
+                            <i class="fas fa-skull"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="userInput" 
+                            placeholder="Ask me anything... I have no restrictions." 
+                            rows="1"
+                            maxlength="4000"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button class="action-button attachment-btn" id="attachmentBtn" title="Attach file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="action-button search-button" id="searchBtn" title="Search web">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="action-button send-button" id="sendBtn" title="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-footer">
+                        <div class="character-count">
+                            <span id="charCount">0</span> / 4000
+                        </div>
+                        <div class="input-hints">
+                            <span class="hint">Press Enter to send, Shift+Enter for new line</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close" id="closeSettings">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="themeSelect">Theme</label>
+                    <select id="themeSelect">
+                        <option value="dark">Dark Red</option>
+                        <option value="darker">Darker Red</option>
+                        <option value="blood">Blood Red</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="fontSizeSlider">Font Size</label>
+                    <input type="range" id="fontSizeSlider" min="12" max="20" value="15">
+                    <span id="fontSizeValue">15px</span>
+                </div>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="soundEnabled" checked>
+                        Enable Sound Effects
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="autoScroll" checked>
+                        Auto-scroll to new messages
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/chat.js"></script>
+    <script src="js/upload.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/bookmark.js"></script>
+    <script src="js/advanced-code.js"></script>
+    <script src="js/voice.js"></script>
+</body>
+</html>
